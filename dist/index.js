@@ -13639,7 +13639,7 @@ const core = __nccwpck_require__(4181);
 const github = __nccwpck_require__(2726);
 const { Octokit } = __nccwpck_require__(2912);
 
-const foo = async () => {
+async function run () {
   const octokit = new Octokit;
   const pull_number = github.context.payload["pull_request"]["number"]
   console.log(`For pull request ${pull_number}`);
@@ -13683,7 +13683,7 @@ const foo = async () => {
   })
 }
 try {
-  foo()
+  run()
 } catch (error) {
   core.setFailed(error.message);
 }

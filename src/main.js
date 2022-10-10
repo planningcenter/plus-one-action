@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const { Octokit } = require("@octokit/action");
 
-const foo = async () => {
+async function run () {
   const octokit = new Octokit;
   const pull_number = github.context.payload["pull_request"]["number"]
   console.log(`For pull request ${pull_number}`);
@@ -46,7 +46,7 @@ const foo = async () => {
   })
 }
 try {
-  foo()
+  run()
 } catch (error) {
   core.setFailed(error.message);
 }
