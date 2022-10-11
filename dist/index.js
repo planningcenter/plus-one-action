@@ -13661,16 +13661,14 @@ async function run () {
     repo,
     pull_number,
   }) 
-  console.log(`This is the pull request ${JSON.stringify(issue, undefined, 2)}`)
 
   const labels = issue["labels"].map(l => l["name"])
   let filteredLabels = labels.filter((l) => !["+1", "+2"].includes(l))
-  console.log(`Filtered labels, ${JSON.stringify(filteredLabels, undefined, 2)}`)
+  console.log(`Filtered labels: ${JSON.stringify(filteredLabels, undefined, 2)}`)
 
-  let switchCount = commentCount
-  if (switchCount >= 2) {
+  if (approvedCount >= 2) {
     filteredLabels.push("+2")
-  } else if (switchCount == 1) {
+  } else if (approvedCount == 1) {
     filteredLabels.push("+1")
   }
   console.log(`We are setting these labels ${JSON.stringify(filteredLabels, undefined, 2)}`)
