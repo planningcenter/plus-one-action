@@ -16,16 +16,14 @@ async function run () {
   })
 
   console.log(`reviews: ${JSON.stringify(prReviews, undefined, 2)}`)
-  const approvedCount = prReviews.data
-    .flatMap((review, i, {length}) => {
-      if (length - 1 !== i) {
-        return [{state: review.state, user: review.user.login }]
-      } else {
-        return []
-      }
-    })
-    .filter(r => r.state == 'APPROVED')
-    .length
+  let reviews = []
+  prReviews.data.reverse().forEach(review => {
+    const reviewer = review.user.login
+    if (!!reviews.find(r => r.reviews === reviewer)) {
+      reviews.push({reviewer: reviewer, state: review.state})
+    }
+  });
+  const approvedCount = reviews.filter(r => r.state === "APPROVED").length
   console.log(`There are ${approvedCount} approvals.`)
 
   let { data: issue } = await octokit.request('GET /repos/{owner}/{repo}/issues/{pull_number}', {
