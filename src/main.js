@@ -15,14 +15,16 @@ async function run () {
     pull_number
   })
 
-  console.log(`reviews: ${JSON.stringify(prReviews, undefined, 2)}`)
+  console.log(`prReviews: ${JSON.stringify(prReviews, undefined, 2)}`)
   let reviews = []
   prReviews.data.reverse().forEach(review => {
     const reviewer = review.user.login
-    if (!!reviews.find(r => r.reviewer === reviewer)) {
+    if (!reviews.find(r => r.reviewer === reviewer)) {
       reviews.push({reviewer: reviewer, state: review.state})
     }
   });
+  console.log(`reviews: ${JSON.stringify(reviews, undefined, 2)}`)
+
   const approvedCount = reviews.filter(r => r.state === "APPROVED").length
   console.log(`There are ${approvedCount} approvals.`)
 
