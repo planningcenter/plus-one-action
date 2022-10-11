@@ -19,7 +19,7 @@ async function run () {
   let reviews = []
   prReviews.data.reverse().forEach(review => {
     const reviewer = review.user.login
-    if (!!reviews.find(r => r.reviews === reviewer)) {
+    if (!!reviews.find(r => r.reviewer === reviewer)) {
       reviews.push({reviewer: reviewer, state: review.state})
     }
   });
