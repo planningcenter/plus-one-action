@@ -4,20 +4,28 @@ const { Octokit } = require("@octokit/action");
 
 async function run () {
   const octokit = new Octokit;
-  const pull_number = github.context.payload["pull_request"]["number"]
-  console.log(`For pull request ${pull_number}`);
-
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+  const pull_number = github.context.payload.pull_request.number
+  const owner = github.context.payload.repository.owner.login
+  const sender = github.context.payload.sender.login
+  const repo = github.context.payload.repository.name
 
   let { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
     owner,
     repo,
     pull_number
   })
-  const commentCount = data.filter((d) => d["state"] === "COMMENTED").length
-  const approvedCount = data.filter((d) => d["state"] === "APPROVED").length
-  const rejectedCount = data.filter((d) => d["state"] === "REJECTED").length
-  console.log(`There ${commentCount} comments, ${approvedCount} approvals, and ${rejectedCount} rejections.`)
+
+  const approvedCount = data
+    .flatMap((review, i, {length}) => {
+      if (length - 1 !== i) {
+        return [{state: review.state, user: review.user.login }]
+      } else {
+        return []
+      }
+    })
+    .filter(r => r.state == 'APPROVED' && r.user != sender)
+    .length
+  console.log(`There are ${approvedCount} approvals.`)
 
   let { data: issue } = await octokit.request('GET /repos/{owner}/{repo}/issues/{pull_number}', {
     owner,
