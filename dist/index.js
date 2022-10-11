@@ -13660,7 +13660,7 @@ async function run () {
         return []
       }
     })
-    .filter(r => r.state == 'APPROVED' && r.user != sender)
+    .filter(r => r.state == 'APPROVED')
     .length
   console.log(`There are ${approvedCount} approvals.`)
 
