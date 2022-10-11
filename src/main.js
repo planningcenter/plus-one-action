@@ -1,21 +1,22 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { Octokit } = require("@octokit/action");
 
 async function run () {
-  const octokit = new Octokit;
+  const githubToken = core.getInput('github_token')
+	const octokit = github.getOctokit(githubToken)
   const pull_number = github.context.payload.pull_request.number
   const owner = github.context.payload.repository.owner.login
-  const sender = github.context.payload.sender.login
   const repo = github.context.payload.repository.name
 
-  let { data } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
+
+  const prReviews = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
     owner,
     repo,
     pull_number
   })
 
-  const approvedCount = data
+  console.log(`reviews: ${JSON.stringify(prReviews, undefined, 2)}`)
+  const approvedCount = prReviews.data
     .flatMap((review, i, {length}) => {
       if (length - 1 !== i) {
         return [{state: review.state, user: review.user.login }]
