@@ -5,7 +5,7 @@ approval.
 
 
 Sample config, place in `.github/workflows/plusone.yml`
-```
+```yaml
 name: Plus one
 
 on:
@@ -16,11 +16,6 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          cache: 'npm'
       - uses: planningcenter/plus-one-action@v1.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
