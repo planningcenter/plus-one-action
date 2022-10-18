@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '16'
           cache: 'npm'
-      - uses: planningcenter/plus-one-action@v1.9
+      - uses: planningcenter/plus-one-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
