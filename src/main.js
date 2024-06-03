@@ -2,25 +2,25 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const { Octokit } = require("@octokit/action");
 
-async function run () {
+async function run() {
   const octokit = new Octokit;
   const pull_number = github.context.payload.pull_request.number
   const owner = github.context.payload.repository.owner.login
   const repo = github.context.payload.repository.name
-
 
   const prReviews = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
     owner,
     repo,
     pull_number
   })
-
   console.log(`prReviews: ${JSON.stringify(prReviews, undefined, 2)}`)
+
   let reviews = []
-  prReviews.data.reverse().forEach(review => {
+  let filteredPrReviews = prReviews.data.reverse().filter(review => review.state !== "COMMENTED");
+  filteredPrReviews.forEach(review => {
     const reviewer = review.user.login
     if (!reviews.find(r => r.reviewer === reviewer)) {
-      reviews.push({reviewer: reviewer, state: review.state})
+      reviews.push({ reviewer: reviewer, state: review.state })
     }
   });
   console.log(`reviews: ${JSON.stringify(reviews, undefined, 2)}`)
@@ -32,7 +32,7 @@ async function run () {
     owner,
     repo,
     pull_number,
-  }) 
+  })
 
   const labels = issue["labels"].map(l => l["name"])
   let filteredLabels = labels.filter((l) => !["+1", "+2"].includes(l))
