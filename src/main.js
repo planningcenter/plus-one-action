@@ -8,21 +8,37 @@ async function run() {
   const owner = github.context.payload.repository.owner.login
   const repo = github.context.payload.repository.name
 
+  let requestedReviewers = []
+  const reviewRequests = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers', {
+    owner,
+    repo,
+    pull_number
+  })
+  console.log(`reviewRequests: ${JSON.stringify(reviewRequests, undefined, 2)}`)
+
+  reviewRequests.data.users.forEach(u => requestedReviewers.push(u.login))
+  console.log(`requestedReviewers: ${JSON.stringify(requestedReviewers, undefined, 2)}`)
+
   const prReviews = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
     owner,
     repo,
     pull_number
   })
-  console.log(`prReviews: ${JSON.stringify(prReviews, undefined, 2)}`)
+  console.log(`prReviews: ${JSON.stringify(prReviews.data.reverse(), undefined, 2)}`)
 
   let reviews = []
-  let filteredPrReviews = prReviews.data.reverse().filter(review => review.state !== "COMMENTED");
+  let filteredPrReviews = prReviews.data.filter(review => review.state !== "COMMENTED");
+  console.log(`filteredPrReviews: ${JSON.stringify(filteredPrReviews, undefined, 2)}`)
+
   filteredPrReviews.forEach(review => {
     const reviewer = review.user.login
     if (!reviews.find(r => r.reviewer === reviewer)) {
-      reviews.push({ reviewer: reviewer, state: review.state })
+      if (!requestedReviewers.includes(reviewer)) {
+        reviews.push({ reviewer: reviewer, state: review.state })
+      }
     }
   });
+
   console.log(`reviews: ${JSON.stringify(reviews, undefined, 2)}`)
 
   const approvedCount = reviews.filter(r => r.state === "APPROVED").length
