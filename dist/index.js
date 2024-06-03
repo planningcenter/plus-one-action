@@ -13639,27 +13639,43 @@ const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
 const { Octokit } = __nccwpck_require__(1231);
 
-async function run () {
+async function run() {
   const octokit = new Octokit;
   const pull_number = github.context.payload.pull_request.number
   const owner = github.context.payload.repository.owner.login
   const repo = github.context.payload.repository.name
 
+  let requestedReviewers = []
+  const reviewRequests = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers', {
+    owner,
+    repo,
+    pull_number
+  })
+  console.log(`reviewRequests: ${JSON.stringify(reviewRequests, undefined, 2)}`)
+
+  reviewRequests.data.users.forEach(u => requestedReviewers.push(u.login))
+  console.log(`requestedReviewers: ${JSON.stringify(requestedReviewers, undefined, 2)}`)
 
   const prReviews = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
     owner,
     repo,
     pull_number
   })
+  console.log(`prReviews: ${JSON.stringify(prReviews.data.reverse(), undefined, 2)}`)
 
-  console.log(`prReviews: ${JSON.stringify(prReviews, undefined, 2)}`)
   let reviews = []
-  prReviews.data.reverse().forEach(review => {
+  let filteredPrReviews = prReviews.data.filter(review => review.state !== "COMMENTED");
+  console.log(`filteredPrReviews: ${JSON.stringify(filteredPrReviews, undefined, 2)}`)
+
+  filteredPrReviews.forEach(review => {
     const reviewer = review.user.login
     if (!reviews.find(r => r.reviewer === reviewer)) {
-      reviews.push({reviewer: reviewer, state: review.state})
+      if (!requestedReviewers.includes(reviewer)) {
+        reviews.push({ reviewer: reviewer, state: review.state })
+      }
     }
   });
+
   console.log(`reviews: ${JSON.stringify(reviews, undefined, 2)}`)
 
   const approvedCount = reviews.filter(r => r.state === "APPROVED").length
@@ -13669,7 +13685,7 @@ async function run () {
     owner,
     repo,
     pull_number,
-  }) 
+  })
 
   const labels = issue["labels"].map(l => l["name"])
   let filteredLabels = labels.filter((l) => !["+1", "+2"].includes(l))
@@ -13694,6 +13710,7 @@ try {
 } catch (error) {
   core.setFailed(error.message);
 }
+
 })();
 
 module.exports = __webpack_exports__;
