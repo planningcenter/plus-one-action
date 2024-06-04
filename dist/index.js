@@ -13669,7 +13669,7 @@ async function run() {
 
   // Gather most recent review from each reviewer
   // Exclude reviewer if they are in the requested reviewers list
-  filteredPrReviews.forEach(review => {
+  filteredPrReviews.reverse().forEach(review => {
     const reviewer = review.user.login
     if (!reviews.find(r => r.reviewer === reviewer)) {
       if (!requestedReviewers.includes(reviewer)) {
