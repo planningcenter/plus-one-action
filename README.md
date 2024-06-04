@@ -9,8 +9,10 @@ Sample config, place in `.github/workflows/plusone.yml`
 name: Plus one
 
 on:
+  pull_request:
+    types: [review_request_removed, review_requested]
   pull_request_review:
-    types: [submitted, dismissed]
+    types: [dismissed, submitted]
 
 jobs:
   lint:
