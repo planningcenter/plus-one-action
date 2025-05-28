@@ -13,6 +13,9 @@ on:
     types: [review_request_removed, review_requested]
   pull_request_review:
     types: [dismissed, submitted]
+permissions:
+    issues: read
+    pull-requests: write
 
 jobs:
   lint:
